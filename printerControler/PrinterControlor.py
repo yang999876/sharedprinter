@@ -11,7 +11,6 @@ class PrinterControlor(object):
 		return text
 
 	def printFile(self, file, filePath):
-		print("print order")
 
 		copy_num = file['copy_num']
 		page_direction = ""
@@ -34,12 +33,11 @@ class PrinterControlor(object):
 		if file['page_range']:
 			page_range = f"-o page-ranges={file['page_range']}"
 
+		print("sending command to lp")
 		printing_command = f"lp -n {copy_num} -o fit-to-page {page_direction} {page_range} {sides} {filePath}"
-		# print(printing_command)
-		# return True
 		with os.popen(printing_command) as res:
 			text = res.read()
-			print(text)
+			print(f"got lp response: '{text}'")
 		jobid = self.getJobIdPat.search(text).group(1)
 		return jobid
 
@@ -50,7 +48,7 @@ class PrinterControlor(object):
 			match = re.search(jobid, text)
 			if match:
 				return True
-			else: # job离开打印队列
+			else:
 				return False
 
 if __name__ == '__main__':

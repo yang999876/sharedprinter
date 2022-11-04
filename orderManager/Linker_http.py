@@ -20,8 +20,8 @@ class Linker(object):
         args = "".join([f"&orders={i}" for i in self.order_list])
         url = f"{self.server}checkmyorder/?printerid={self.printer_id}{args}"
         # data = {"orders": self.order_list}
-        # print("orderLIst:", self.order_list)
-        self.logger.info(f"get my orders, order list = {str(self.order_list)}")
+        if len(self.order_list) > 0:
+            self.logger.info(f"get my orders, order list = {str(self.order_list)}")
         try:
             response = requests.get(url, timeout=(2, 5))
             content = json.loads(response.content)
@@ -39,7 +39,7 @@ class Linker(object):
             else:
                 print(res.status_code, res.reason)
         except Exception as e:
-            logger.error("Error occur!!!",exc_info = True)
+            self.logger.error("Error occur!!!",exc_info = True)
             return None
 
     # 返回订单完成的消息
@@ -51,7 +51,7 @@ class Linker(object):
             else:
                 print(res.status_code, res.reason)
         except Exception as e:
-            logger.error("Error occur!!!",exc_info = True)
+            self.logger.error("Error occur!!!",exc_info = True)
             return False
 
     # 根据文件名下载文件
@@ -63,7 +63,7 @@ class Linker(object):
             else:
                 print(res.status_code, res.reason)
         except:
-            logger.error("Error occur!!!",exc_info = True)
+            self.logger.error("Error occur!!!",exc_info = True)
             return self.getfile(file_name)
 
     # 查询并处理订单，将订单加入工作队列
@@ -102,11 +102,8 @@ class Linker(object):
         while True:
             message = self.messageQueue.get()
             if message["complete"]:
-                # 有一个文件完成了
                 orderid = message["order_id"]
                 fileid = message["file_id"]
-                print(fileid)
-                print(self.order_files)
                 ack = self.orderok(orderid, fileid)
                 if ack == "ok":
                     # 删除文件
@@ -115,10 +112,10 @@ class Linker(object):
                         if not self.order_files[orderid]:
                             del self.order_files[orderid]
                             self.order_list.remove(orderid)
-                            print(orderid, "订单完成")
+                            print(f"order #{orderid} done")
                     except Exception as e:
                         # 删除文件失败
-                        logger.error("Error occur!!!",exc_info = True)
+                        self.logger.error("Error occur!!!",exc_info = True)
 
     # 连续处理订单
     def checkloop(self):

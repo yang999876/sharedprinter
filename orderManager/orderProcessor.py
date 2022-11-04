@@ -42,7 +42,7 @@ class OrderProcessor(object):
             # print(orderid, "订单已存在")
             if storage_name in os.listdir(f"{self.order_list_path}{orderid}"):
                 # 文件已下载
-                print(file['file_id'], "已下载")
+                print(f"file '{file['file_id']}' downloaded")
                 return True
         return False
 
@@ -57,7 +57,7 @@ class OrderProcessor(object):
         if not fileBuffer:
             print("file not exist")
             return False
-        print("saveFile", file['file_id'], file['file_name'])
+        print(f"saving file, id {file['file_id']}, name {file['file_name']}")
         orderid = file['order_id']
         while "config" in os.listdir(f"{self.order_list_path}{orderid}"):
             # 当配置文件在订单文件夹内时
@@ -69,9 +69,8 @@ class OrderProcessor(object):
             # for i in range(len(order["file_list"])):
             # print(len(fileBuffer), int(order["file_size"]))
             # if len(fileBuffer) == int(order["file_size"]):
-            filename = file['storage_name']
-            print(f"{self.order_list_path}{orderid}/{filename}")
-            with open(f"{self.order_list_path}{orderid}/{filename}", "wb") as f:
+            path = f"{self.order_list_path}{orderid}/{file['storage_name']}" 
+            with open(path, "wb") as f:
                 f.write(fileBuffer)
             self.file_list.put(file)
             return True
@@ -79,11 +78,9 @@ class OrderProcessor(object):
 
     # 检测打印任务是否完成
     def observePrintingJob(self, jobid, order_id, file_id):
-        # if jobid != "docok":
         while self.printer.checkJobIsAlive(jobid):
-            sleep(1)
-        # 走到这里说明订单已经离开cups系统，认为打印完成
-        print(file_id, "号文件完成")
+            sleep(100)
+        print(f"file '{file_id}' was printed successfully")
         self.messageQueue.put({
             "order_id":order_id, 
             "complete": True,
@@ -104,20 +101,20 @@ class OrderProcessor(object):
 
     # 主线程，持续处理未完成订单
     def processOrders(self):
+        print("waiting for orders")
         while True:
             file = self.file_list.get()
             if file['status']:
                 # 如果文件已完成
                 continue
-            print("有文件，打它")
+            print("file received, proceeding to printing")
             orderDir = f"{self.order_list_path}{file['order_id']}"
             filename = file['storage_name']
             file_id = file['file_id']
             order_id = file['order_id']
             have_file = self.is_file_download(file)
-            # print(have_file)
             if have_file:
-                print("打印", f"{orderDir}/{filename}")
+                print("now printing ", f"{orderDir}/{filename}")
                 jobid = self.printer.printFile(file, f"{orderDir}/{filename}")
                 self.observePrintingJob(jobid, order_id, file_id)
             # self.file_list.task_done()

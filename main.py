@@ -12,7 +12,8 @@ messageQueue = Queue(maxsize=0)
 if __name__ == "__main__":
 	logging.basicConfig(
 		level = logging.INFO,
-		format = '%(asctime)s - %(name)s - %(funcName)s - line%(lineno)d - %(levelname)s - %(message)s',
+		# format = '[%(asctime)s] %(name)s - %(funcName)s - line%(lineno)d - %(levelname)s - %(message)s',
+		format = '[%(asctime)s] [%(levelname)s] (%(funcName)s) %(message)s',
 		filename = 'log/run.log',
 		filemode = 'a'
 	)
