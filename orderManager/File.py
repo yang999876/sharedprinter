@@ -59,4 +59,3 @@ class File(object):
 
 if __name__ == '__main__':
 	file = File()
-	print(file.getFileString())

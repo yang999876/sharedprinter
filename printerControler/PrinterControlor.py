@@ -1,9 +1,11 @@
 import os
 import re
+import logging
 
 class PrinterControlor(object): 
 	def __init__(self):
 		self.getJobIdPat = re.compile("request id is (.+?) ")
+		self.logger = logging.getLogger("printer.linker")
 
 	def checkPrinter(self):
 		with os.popen("lp -p -d") as res:
@@ -33,11 +35,10 @@ class PrinterControlor(object):
 		if file['page_range']:
 			page_range = f"-o page-ranges={file['page_range']}"
 
-		print("sending command to lp")
 		printing_command = f"lp -n {copy_num} -o fit-to-page {page_direction} {page_range} {sides} {filePath}"
 		with os.popen(printing_command) as res:
 			text = res.read()
-			print(f"got lp response: '{text}'")
+			self.logger.info(f"got lp response: '{text}'")
 		jobid = self.getJobIdPat.search(text).group(1)
 		return jobid
 

@@ -20,8 +20,6 @@ class Linker(object):
         args = "".join([f"&orders={i}" for i in self.order_list])
         url = f"{self.server}checkmyorder/?printerid={self.printer_id}{args}"
         # data = {"orders": self.order_list}
-        if len(self.order_list) > 0:
-            self.logger.info(f"get my orders, order list = {str(self.order_list)}")
         try:
             response = requests.get(url, timeout=(2, 5))
             content = json.loads(response.content)
@@ -37,7 +35,7 @@ class Linker(object):
             if res.status_code==200:
                 return json.loads(res.content)
             else:
-                print(res.status_code, res.reason)
+                self.logger.error(f"error getorderfile {res.status_code} f{res.reason}")
         except Exception as e:
             self.logger.error("Error occur!!!",exc_info = True)
             return None
@@ -49,7 +47,7 @@ class Linker(object):
             if res.status_code==200:
                 return res.text
             else:
-                print(res.status_code, res.reason)
+                self.logger.error(f"error fileok {res.status_code} f{res.reason}")
         except Exception as e:
             self.logger.error("Error occur!!!",exc_info = True)
             return False
@@ -61,7 +59,7 @@ class Linker(object):
             if res.status_code==200:
                 return res.content
             else:
-                print(res.status_code, res.reason)
+                self.logger.error(f"error getfile {res.status_code} f{res.reason}")
         except:
             self.logger.error("Error occur!!!",exc_info = True)
             return self.getfile(file_name)
@@ -92,10 +90,10 @@ class Linker(object):
                             file_buffer = self.getfile(file["storage_name"])
                             saved = self.orderProcessor.saveFile(file, file_buffer)
                             if not saved:
-                                print(orderid, "fail")
+                                self.logger.error(f"error download file #{orderid}")
                         else:
                             self.orderProcessor.file_list.put(file)
-            sleep(2)
+            sleep(10)
     
     # 打印完成后
     def order_complete(self): 
@@ -112,7 +110,7 @@ class Linker(object):
                         if not self.order_files[orderid]:
                             del self.order_files[orderid]
                             self.order_list.remove(orderid)
-                            print(f"order #{orderid} done")
+                            self.logger.info(f"order #{orderid} done")
                     except Exception as e:
                         # 删除文件失败
                         self.logger.error("Error occur!!!",exc_info = True)

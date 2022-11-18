@@ -1,7 +1,7 @@
 # import sys
 # sys.path.append("..")
 import os
-import re
+import logging
 import shutil
 from threading import Thread
 import json
@@ -17,17 +17,16 @@ class OrderProcessor(object):
         self.file_list = Queue(maxsize=0)
         Thread(target=self.auto_delete).start()
         self.printer = PrinterControlor()
+        self.logger = logging.getLogger("printer.linker")
 
     # 自动删除一天前的文件
     def auto_delete(self):
         while True:
             orderList = os.listdir(self.order_list_path)
             now = int(time())
-            # print(orderList)
             for order_id in orderList:
                 orderDir = f"{self.order_list_path}{order_id}"
                 orderConfig = self.readOrderConfig(orderDir)
-                # print(order_id, now - orderConfig["order_time"])
                 if (now - orderConfig["order_time"])>3600*24:
                     # 把一天前的订单自动删除
                     shutil.rmtree(orderDir)
@@ -37,12 +36,10 @@ class OrderProcessor(object):
     def is_file_download(self, file):
         orderid = str(file['order_id'])
         storage_name = str(file['storage_name'])
-        # print(orderid, storage_name)
         if orderid in os.listdir(self.order_list_path):
-            # print(orderid, "订单已存在")
             if storage_name in os.listdir(f"{self.order_list_path}{orderid}"):
                 # 文件已下载
-                print(f"file '{file['file_id']}' downloaded")
+                self.logger.info(f"downloaded file '{file['file_id']}'")
                 return True
         return False
 
@@ -55,9 +52,9 @@ class OrderProcessor(object):
     # 保存文件
     def saveFile(self, file, fileBuffer):
         if not fileBuffer:
-            print("file not exist")
+            self.logger.error("file not exist")
             return False
-        print(f"saving file, id {file['file_id']}, name {file['file_name']}")
+        self.logger.info(f"saving file {file['file_name']}")
         orderid = file['order_id']
         while "config" in os.listdir(f"{self.order_list_path}{orderid}"):
             # 当配置文件在订单文件夹内时
@@ -80,7 +77,7 @@ class OrderProcessor(object):
     def observePrintingJob(self, jobid, order_id, file_id):
         while self.printer.checkJobIsAlive(jobid):
             sleep(100)
-        print(f"file '{file_id}' was printed successfully")
+        self.logger.info(f"printed '{file_id}'")
         self.messageQueue.put({
             "order_id":order_id, 
             "complete": True,
@@ -90,7 +87,6 @@ class OrderProcessor(object):
     # order字典
     def addOrder(self, order):
         # TODO
-        print("add", order)
         workDir = self.order_list_path+str(order["order_id"])
         try:
             os.mkdir(workDir)
@@ -101,20 +97,18 @@ class OrderProcessor(object):
 
     # 主线程，持续处理未完成订单
     def processOrders(self):
-        print("waiting for orders")
         while True:
             file = self.file_list.get()
             if file['status']:
                 # 如果文件已完成
                 continue
-            print("file received, proceeding to printing")
             orderDir = f"{self.order_list_path}{file['order_id']}"
             filename = file['storage_name']
             file_id = file['file_id']
             order_id = file['order_id']
             have_file = self.is_file_download(file)
             if have_file:
-                print("now printing ", f"{orderDir}/{filename}")
+                self.logger.info("now printing ", f"{orderDir}/{filename}")
                 jobid = self.printer.printFile(file, f"{orderDir}/{filename}")
                 self.observePrintingJob(jobid, order_id, file_id)
             # self.file_list.task_done()
