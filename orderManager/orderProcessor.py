@@ -39,7 +39,7 @@ class OrderProcessor(object):
         if orderid in os.listdir(self.order_list_path):
             if storage_name in os.listdir(f"{self.order_list_path}{orderid}"):
                 # 文件已下载
-                self.logger.info(f"downloaded file '{file['file_id']}'")
+                self.logger.info(f"one file of #{orderid} saved")
                 return True
         return False
 
@@ -54,7 +54,7 @@ class OrderProcessor(object):
         if not fileBuffer:
             self.logger.error("file not exist")
             return False
-        self.logger.info(f"saving file {file['file_name']}")
+        self.logger.info(f"saving file '{file['file_name']}' of #{file[orderid]}")
         orderid = file['order_id']
         while "config" in os.listdir(f"{self.order_list_path}{orderid}"):
             # 当配置文件在订单文件夹内时
@@ -76,7 +76,7 @@ class OrderProcessor(object):
     # 检测打印任务是否完成
     def observePrintingJob(self, jobid, order_id, file_id):
         while self.printer.checkJobIsAlive(jobid):
-            sleep(100)
+            sleep(10)
         self.messageQueue.put({
             "order_id":order_id, 
             "complete": True,
@@ -107,7 +107,7 @@ class OrderProcessor(object):
             order_id = file['order_id']
             have_file = self.is_file_download(file)
             if have_file:
-                self.logger.info(f"now printing {orderDir}/{filename}")
+                self.logger.info(f"now printing #{order_id}'s {filename}")
                 jobid = self.printer.printFile(file, f"{orderDir}/{filename}")
                 self.observePrintingJob(jobid, order_id, file_id)
             # self.file_list.task_done()
