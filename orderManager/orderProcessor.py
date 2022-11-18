@@ -77,7 +77,6 @@ class OrderProcessor(object):
     def observePrintingJob(self, jobid, order_id, file_id):
         while self.printer.checkJobIsAlive(jobid):
             sleep(100)
-        self.logger.info(f"printed '{file_id}'")
         self.messageQueue.put({
             "order_id":order_id, 
             "complete": True,
@@ -108,7 +107,7 @@ class OrderProcessor(object):
             order_id = file['order_id']
             have_file = self.is_file_download(file)
             if have_file:
-                self.logger.info("now printing ", f"{orderDir}/{filename}")
+                self.logger.info(f"now printing {orderDir}/{filename}")
                 jobid = self.printer.printFile(file, f"{orderDir}/{filename}")
                 self.observePrintingJob(jobid, order_id, file_id)
             # self.file_list.task_done()

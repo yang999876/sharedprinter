@@ -35,7 +35,7 @@ class Linker(object):
             if res.status_code==200:
                 return json.loads(res.content)
             else:
-                self.logger.error(f"error getorderfile {res.status_code} f{res.reason}")
+                self.logger.error(f"error getorderfile {res.status_code} {res.reason}")
         except Exception as e:
             self.logger.error("Error occur!!!",exc_info = True)
             return None
@@ -47,7 +47,7 @@ class Linker(object):
             if res.status_code==200:
                 return res.text
             else:
-                self.logger.error(f"error fileok {res.status_code} f{res.reason}")
+                self.logger.error(f"error fileok {res.status_code} {res.reason}")
         except Exception as e:
             self.logger.error("Error occur!!!",exc_info = True)
             return False
@@ -59,7 +59,7 @@ class Linker(object):
             if res.status_code==200:
                 return res.content
             else:
-                self.logger.error(f"error getfile {res.status_code} f{res.reason}")
+                self.logger.error(f"error getfile {res.status_code} {res.reason}")
         except:
             self.logger.error("Error occur!!!",exc_info = True)
             return self.getfile(file_name)
@@ -110,7 +110,7 @@ class Linker(object):
                         if not self.order_files[orderid]:
                             del self.order_files[orderid]
                             self.order_list.remove(orderid)
-                            self.logger.info(f"order #{orderid} done")
+                            self.logger.info(f"order #{orderid} is done")
                     except Exception as e:
                         # 删除文件失败
                         self.logger.error("Error occur!!!",exc_info = True)

@@ -38,7 +38,7 @@ class PrinterControlor(object):
 		printing_command = f"lp -n {copy_num} -o fit-to-page {page_direction} {page_range} {sides} {filePath}"
 		with os.popen(printing_command) as res:
 			text = res.read()
-			self.logger.info(f"got lp response: '{text}'")
+			# self.logger.info(f"got lp response: '{text}'")
 		jobid = self.getJobIdPat.search(text).group(1)
 		return jobid
 

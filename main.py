@@ -13,12 +13,12 @@ messageQueue = Queue(maxsize=0)
 if __name__ == "__main__":
 	logging.basicConfig(
 		level = logging.INFO,
-		format = '[%(asctime)s] [%(levelname)s] (%(funcName)s) %(message)s',
+		format = '[%(asctime)s] [%(levelname)s] %(message)s',
 		stream = sys.stdout
 	)
 	logger = logging.getLogger("priner")
-	logger.info("Start printer!")
 	myOrderProcessor = OrderProcessor(orderList, messageQueue)
 	myLinker = Linker(server, deviceID, myOrderProcessor, messageQueue)
 	Thread(target=myLinker.checkloop).start()
 	Thread(target=myOrderProcessor.processOrders).start()
+	logger.info("printer started")
