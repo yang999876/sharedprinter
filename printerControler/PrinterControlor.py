@@ -39,7 +39,7 @@ class PrinterControlor(object):
 		if is_booklet:
 			sig = 4 * math.ceil(page_num / 4)
 			convertCommand = f"pdfbook2 --signature {sig} {filePath}"
-			os.popen(convertCommand).wait()
+			os.popen(convertCommand).read()
 			filePath = filePath[:-4] + "-book.pdf"
 
 		if file['page_range']:
