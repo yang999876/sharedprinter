@@ -37,9 +37,9 @@ class PrinterControlor(object):
 			sides = "-o sides=one-sided"
 
 		if is_booklet:
-			sig = math.ceil(page_num / 4)
+			sig = 4 * math.ceil(page_num / 4)
 			convertCommand = f"pdfbook2 --signature {sig} {filePath}"
-			os.popen(convertCommand)
+			os.popen(convertCommand).wait()
 			filePath = filePath[:-4] + "-book.pdf"
 
 		if file['page_range']:
