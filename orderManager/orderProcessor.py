@@ -54,7 +54,7 @@ class OrderProcessor(object):
         if not fileBuffer:
             self.logger.error("file not exist")
             return False
-        self.logger.info(f"saving file '{file['file_name']}' of #{file[orderid]}")
+        self.logger.info(f"saving file '{file['file_name']}' of #{file['order_id']}")
         orderid = file['order_id']
         while "config" in os.listdir(f"{self.order_list_path}{orderid}"):
             # 当配置文件在订单文件夹内时
