@@ -1,6 +1,7 @@
 import os
 import re
 import logging
+import math
 
 class PrinterControlor(object): 
 	def __init__(self):
@@ -17,13 +18,16 @@ class PrinterControlor(object):
 		copy_num = file['copy_num']
 		page_direction = ""
 		page_range = ""
+		page_num = file['page_num']
 		is_duplex = file['is_duplex']
+		is_booklet = file['is_booklet']
 		sides = ""
 
 		if file['page_direction']:
 			page_direction = f"-o {file['page_direction']}"
 
-		if is_duplex:
+
+		if is_duplex or is_booklet:
 			sides = "-o sides=two-sided"
 			if page_direction=="portrait":
 				sides += "-long-edge"
@@ -32,13 +36,18 @@ class PrinterControlor(object):
 		else:
 			sides = "-o sides=one-sided"
 
+		if is_booklet:
+			sig = math.ceil(page_num / 4)
+			convertCommand = f"pdfbook2 --signature {sig} {filePath}"
+			os.popen(convertCommand)
+			filePath = filePath[:-4] + "-book.pdf"
+
 		if file['page_range']:
 			page_range = f"-o page-ranges={file['page_range']}"
 
 		printing_command = f"lp -n {copy_num} -o fit-to-page {page_direction} {page_range} {sides} {filePath}"
 		with os.popen(printing_command) as res:
 			text = res.read()
-			# self.logger.info(f"got lp response: '{text}'")
 		jobid = self.getJobIdPat.search(text).group(1)
 		return jobid
 

@@ -1,4 +1,3 @@
-
 import json
 import logging
 import requests
@@ -25,7 +24,7 @@ class Linker(object):
             content = json.loads(response.content)
             return content
         except Exception as e:
-            self.logger.error("Error occur!!! \nreuqests ERROR")
+            self.logger.error("error occur while fetching new orders", exc_info=True)
             return False
 
     # 根据订单号获得文件信息
@@ -37,7 +36,7 @@ class Linker(object):
             else:
                 self.logger.error(f"error getorderfile {res.status_code} {res.reason}")
         except Exception as e:
-            self.logger.error("Error occur!!!",exc_info = True)
+            self.logger.error("error occur while getting file info", exc_info=True)
             return None
 
     # 返回订单完成的消息
@@ -49,7 +48,7 @@ class Linker(object):
             else:
                 self.logger.error(f"error fileok {res.status_code} {res.reason}")
         except Exception as e:
-            self.logger.error("Error occur!!!",exc_info = True)
+            self.logger.error("error occur while sending fileok signal", exc_info=True)
             return False
 
     # 根据文件名下载文件
@@ -61,7 +60,7 @@ class Linker(object):
             else:
                 self.logger.error(f"error getfile {res.status_code} {res.reason}")
         except:
-            self.logger.error("Error occur!!!",exc_info = True)
+            self.logger.error("error occur while downloading file", exc_info=True)
             return self.getfile(file_name)
 
     # 查询并处理订单，将订单加入工作队列
