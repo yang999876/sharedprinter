@@ -7,7 +7,7 @@ def getPdftkOrder(n):
   rest = 4 - n % 4
   rst = []
   for i in range(1, rest+1):
-    rst.append(0)
+    rst.append('A1')
     rst.append(i)
   end = int(math.ceil(n/4) * 4)
   half = int(end / 2)
@@ -45,20 +45,20 @@ class PrinterControlor(object):
 
 		if is_duplex or is_booklet:
 			sides = "-o sides=two-sided"
-			if file['page_direction']=="portrait":
-				sides += "-long-edge"
-			elif is_booklet or file['page_direction']=="landscape":
+			if is_booklet or file['page_direction']=="landscape":
 				sides += "-short-edge"
+			else:
+				sides += "-long-edge"
 		else:
 			sides = "-o sides=one-sided"
 
 		if is_booklet:
+			booklet = "-o number-up=2"
 			pageOrder = getPdftkOrder(page_num)
 			convertedPath = filePath[:-4] + "-book.pdf"
-			convertCommand = f"pdftk {filePath} cat {pageOrder} output {convertedPath}"
+			convertCommand = f"pdftk {filePath} A=asset/blank.pdf cat {pageOrder} output {convertedPath}"
 			with os.popen(convertCommand) as res:
 				text = res.read()
-			booklet = "-o number-up=2"
 			filePath = convertedPath
 
 		if file['page_range']:
