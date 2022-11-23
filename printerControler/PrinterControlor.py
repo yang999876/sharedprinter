@@ -48,7 +48,7 @@ class PrinterControlor(object):
 			sides = "-o sides=two-sided"
 			if page_direction=="portrait":
 				sides += "-long-edge"
-			elif page_direction=="landscape":
+			elif is_booklet or page_direction=="landscape":
 				sides += "-short-edge"
 		else:
 			sides = "-o sides=one-sided"
