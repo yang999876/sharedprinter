@@ -3,6 +3,22 @@ import re
 import logging
 import math
 
+def getPdftkOrder(n):
+  rest = 4 - n % 4
+  rst = []
+  for i in range(1, rest+1):
+    rst.append(0)
+    rst.append(i)
+  end = int(math.ceil(n/4) * 4)
+  half = int(end / 2)
+  for i in range(rest+1, half+1):
+    rst.append(end-i+1)
+    rst.append(i)
+  out = ''
+  for i in rst:
+    out += str(i) + " "
+  return out
+
 class PrinterControlor(object): 
 	def __init__(self):
 		self.getJobIdPat = re.compile("request id is (.+?) ")
@@ -22,6 +38,7 @@ class PrinterControlor(object):
 		is_duplex = file['is_duplex']
 		is_booklet = file['is_booklet']
 		sides = ""
+		booklet = ""
 
 		if file['page_direction']:
 			page_direction = f"-o {file['page_direction']}"
@@ -37,15 +54,18 @@ class PrinterControlor(object):
 			sides = "-o sides=one-sided"
 
 		if is_booklet:
-			sig = 4 * math.ceil(page_num / 4)
-			convertCommand = f"pdfbook2 --signature {sig} {filePath}"
-			os.popen(convertCommand).read()
-			filePath = filePath[:-4] + "-book.pdf"
+			pageOrder = getPdftkOrder(page_num)
+			convertedPath = filePath[:-4] + "-book.pdf"
+			convertCommand = f"pdftk {filePath} cat {pageOrder} output {convertedPath}"
+			with os.popen(convertCommand) as res:
+				text = res.read()
+			booklet = "-o number-up=2"
+			filePath = convertedPath
 
 		if file['page_range']:
 			page_range = f"-o page-ranges={file['page_range']}"
 
-		printing_command = f"lp -n {copy_num} -o fit-to-page {page_direction} {page_range} {sides} {filePath}"
+		printing_command = f"lp -n {copy_num} -o fit-to-page {page_direction} {page_range} {booklet} {sides} {filePath}"
 		with os.popen(printing_command) as res:
 			text = res.read()
 		jobid = self.getJobIdPat.search(text).group(1)
