@@ -18,27 +18,16 @@ from time import time
 # 合法的打印类型
 class Order(object):
 	def __init__(self, order_id=0, printer_id=0, openid="", order_time=0, 
-		file_num=0, total_fee=0, is_pay=False, is_ack=False, status=False, dbres=None):
-		if dbres:
-			self.order_id = dbres[0]
-			self.printer_id = dbres[1]
-			self.openid = dbres[2]
-			self.order_time = int(time.mktime(dbres[3].timetuple()))
-			self.file_num = dbres[4]
-			self.total_fee = dbres[5]
-			self.is_pay = dbres[6]
-			self.is_ack = dbres[7]
-			self.status = dbres[8]
-		else:
-			self.order_id = order_id
-			self.printer_id = printer_id
-			self.openid = openid
-			self.order_time = order_time or int(time())
-			self.file_num = file_num
-			self.total_fee = total_fee
-			self.is_pay = is_pay
-			self.is_ack = is_ack
-			self.status = status
+		file_num=0, total_fee=0, is_pay=False, is_ack=False, status=False):
+		self.order_id = order_id
+		self.printer_id = printer_id
+		self.openid = openid
+		self.order_time = order_time or int(time())
+		self.file_num = file_num
+		self.total_fee = total_fee
+		self.is_pay = is_pay
+		self.is_ack = is_ack
+		self.status = status
 		self.orderLen = self.getOrderLen()
 
 	def getOrderLen(self):
