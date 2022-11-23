@@ -43,12 +43,11 @@ class PrinterControlor(object):
 		if file['page_direction']:
 			page_direction = f"-o {file['page_direction']}"
 
-
 		if is_duplex or is_booklet:
 			sides = "-o sides=two-sided"
-			if page_direction=="portrait":
+			if file['page_direction']=="portrait":
 				sides += "-long-edge"
-			elif is_booklet or page_direction=="landscape":
+			elif is_booklet or file['page_direction']=="landscape":
 				sides += "-short-edge"
 		else:
 			sides = "-o sides=one-sided"
