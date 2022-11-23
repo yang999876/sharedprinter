@@ -109,7 +109,7 @@ class Linker(object):
                         if not self.order_files[orderid]:
                             del self.order_files[orderid]
                             self.order_list.remove(orderid)
-                            self.logger.info(f"order #{orderid} is done")
+                            self.logger.info(f"#{orderid} done")
                     except Exception as e:
                         # 删除文件失败
                         self.logger.error("Error occur!!!",exc_info = True)
