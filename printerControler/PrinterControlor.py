@@ -6,14 +6,25 @@ import math
 def getPdftkOrder(n):
   rest = 4 - n % 4
   rst = []
+  odd = True
   for i in range(1, rest+1):
-    rst.append('A1')
-    rst.append(i)
+    if odd:
+      rst.append('A1')
+      rst.append(i)
+    else:
+      rst.append(i)
+      rst.append('A1')
+    odd = not odd
   end = int(math.ceil(n/4) * 4)
   half = int(end / 2)
   for i in range(rest+1, half+1):
-    rst.append(end-i+1)
-    rst.append(i)
+    if odd:
+      rst.append(end-i+1)
+      rst.append(i)
+    else:
+      rst.append(i)
+      rst.append(end-i+1)
+    odd = not odd
   out = ''
   for i in rst:
     out += str(i) + " "
