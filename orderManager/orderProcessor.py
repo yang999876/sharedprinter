@@ -51,7 +51,7 @@ class OrderProcessor(object):
         if not fileBuffer:
             self.logger.error("file not exist")
             return False
-        self.logger.info(f"#{file['order_id']} saving '{file['file_name']}'")
+        self.logger.info(f"#{file['order_id']} saving {file['storage_name']} with '{file['file_name']}'")
         orderid = file['order_id']
         while "config" in os.listdir(f"{self.order_list_path}{orderid}"):
             # 当配置文件在订单文件夹内时
@@ -104,7 +104,7 @@ class OrderProcessor(object):
             order_id = file['order_id']
             have_file = self.is_file_download(file)
             if have_file:
-                self.logger.info(f"#{order_id} printing {filename}")
+                self.logger.info(f"#{order_id} printing {file['file_name']}")
                 jobid = self.printer.printFile(file, f"{orderDir}/{filename}")
                 self.observePrintingJob(jobid, order_id, file_id)
             # self.file_list.task_done()
