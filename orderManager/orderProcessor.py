@@ -8,16 +8,15 @@ import json
 from time import sleep
 from time import time
 from queue import Queue
-from printerControler.PrinterControlor import PrinterControlor
 
 class OrderProcessor(object):
-    def __init__(self, order_list_path, messageQueue):
+    def __init__(self, controler, order_list_path, messageQueue):
         self.messageQueue = messageQueue
         self.order_list_path = order_list_path
         self.file_list = Queue(maxsize=0)
         Thread(target=self.auto_delete).start()
-        self.printer = PrinterControlor()
-        self.logger = logging.getLogger("printer.linker")
+        self.printer = controler
+        self.logger = logging.getLogger("printer.orderProcesser")
 
     # 自动删除一天前的文件
     def auto_delete(self):

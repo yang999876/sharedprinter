@@ -20,17 +20,22 @@ def getPdftkOrder(n):
   return out
 
 class PrinterControlor(object): 
-	def __init__(self):
+	def __init__(self, deviceManufact):
 		self.getJobIdPat = re.compile("request id is (.+?) ")
 		self.logger = logging.getLogger("printer.linker")
+		self.manufact = deviceManufact
 
 	def checkPrinter(self):
 		with os.popen("lp -p -d") as res:
 			text = res.read()
 		return text
 
-	def printFile(self, file, filePath):
+	def checkPrinterAlive(self):
+		with os.popen(f"lsusb | grep '{self.manufact}'") as res:
+			text = res.read()
+			return True if text else False
 
+	def printFile(self, file, filePath):
 		copy_num = file['copy_num']
 		page_direction = ""
 		page_range = ""
