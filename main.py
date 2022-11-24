@@ -20,7 +20,7 @@ if __name__ == "__main__":
 	)
 	logger = logging.getLogger("priner")
 	myControler = PrinterControlor(deviceManufact)
-	myOrderProcessor = OrderProcessor(orderList, messageQueue)
+	myOrderProcessor = OrderProcessor(myControler, orderList, messageQueue)
 	myLinker = Linker(server, deviceID, deviceManufact, myOrderProcessor, messageQueue)
 	Thread(target=myLinker.checkloop).start()
 	Thread(target=myOrderProcessor.processOrders).start()
