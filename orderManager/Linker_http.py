@@ -46,7 +46,7 @@ class Linker(object):
             response = requests.get(url, timeout=(2, 5))
             content = json.loads(response.content)
             return content
-        except requests.exceptions.ConnectTimeout:
+        except (requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout, TimeoutError):
             self.timeoutCnt += 1
             if (self.timeoutCnt > 10):
                 self.logger.error("timeout accumulates to 10")

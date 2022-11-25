@@ -73,7 +73,7 @@ class OrderProcessor(object):
     # 检测打印任务是否完成
     def observePrintingJob(self, jobid, order_id, file_id):
         while self.printer.checkJobIsAlive(jobid):
-            sleep(10)
+            sleep(1)
         self.messageQueue.put({
             "order_id":order_id, 
             "complete": True,
