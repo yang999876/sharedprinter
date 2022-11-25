@@ -12,6 +12,7 @@ class Linker(object):
         self.orderProcessor = orderProcessor
         self.order_list = []
         self.order_files = {}
+        self.timeoutCnt = 0
         self.logger = logging.getLogger("printer.linker")
 
     def mark_printer_awake(self):
@@ -45,6 +46,11 @@ class Linker(object):
             response = requests.get(url, timeout=(2, 5))
             content = json.loads(response.content)
             return content
+        except requests.exceptions.ConnectTimeout:
+            self.timeoutCnt += 1
+            if (self.timeoutCnt > 10):
+                self.logger.error("timeout accumulates to 10")
+                self.timeoutCnt = 0
         except Exception as e:
             self.logger.error("error occur while fetching new orders", exc_info=True)
             return False
