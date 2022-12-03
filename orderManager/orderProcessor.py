@@ -82,7 +82,6 @@ class OrderProcessor(object):
 
     # order字典
     def addOrder(self, order):
-        # TODO
         workDir = self.order_list_path+str(order["order_id"])
         try:
             os.mkdir(workDir)

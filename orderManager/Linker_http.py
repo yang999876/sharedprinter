@@ -23,7 +23,7 @@ class Linker(object):
             else:
                 self.logger.error(f"error marking printer awake {res.status_code} {res.reason}")
         except Exception as e:
-            self.logger.error("error marking printer awake", exc_info=True)
+            self.logger.error("error marking printer awake")
             return False
 
     def mark_printer_sleep(self):
@@ -34,7 +34,7 @@ class Linker(object):
             else:
                 self.logger.error(f"error marking printer sleep {res.status_code} {res.reason}")
         except Exception as e:
-            self.logger.error("error marking printer sleep", exc_info=True)
+            self.logger.error("error marking printer sleep")
             return False
 
     # 根据设备编号获取未完成订单
@@ -52,7 +52,7 @@ class Linker(object):
                 self.logger.error("timeout accumulates to 10")
                 self.timeoutCnt = 0
         except Exception as e:
-            self.logger.error("error occur while fetching new orders", exc_info=True)
+            self.logger.error("error occur while fetching new orders")
             return False
 
     # 根据订单号获得文件信息
@@ -64,7 +64,7 @@ class Linker(object):
             else:
                 self.logger.error(f"error getorderfile {res.status_code} {res.reason}")
         except Exception as e:
-            self.logger.error("error occur while getting file info", exc_info=True)
+            self.logger.error("error occur while getting file info")
             return None
 
     # 返回订单完成的消息
@@ -76,7 +76,7 @@ class Linker(object):
             else:
                 self.logger.error(f"error fileok {res.status_code} {res.reason}")
         except Exception as e:
-            self.logger.error("error occur while sending fileok signal", exc_info=True)
+            self.logger.error("error occur while sending fileok signal")
             return False
 
     # 根据文件名下载文件
@@ -88,7 +88,7 @@ class Linker(object):
             else:
                 self.logger.error(f"error getfile {res.status_code} {res.reason}")
         except:
-            self.logger.error("error occur while downloading file", exc_info=True)
+            self.logger.error("error occur while downloading file")
             return self.getfile(file_name)
 
     def check_order(self):
