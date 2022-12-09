@@ -53,6 +53,7 @@ class PrinterControlor(object):
 		page_num = file['page_num']
 		is_duplex = file['is_duplex']
 		is_booklet = file['is_booklet']
+		crop_margin = file['crop_margin']
 		sides = ""
 		booklet = ""
 
@@ -67,6 +68,13 @@ class PrinterControlor(object):
 				sides += "-long-edge"
 		else:
 			sides = "-o sides=one-sided"
+
+		if crop_margin:
+			cropCommand = f"pdfcropmargins {filePath}"
+			croppedPath = filePath[:-4] + "_cropped.pdf"
+			with os.popen(cropCommand) as res:
+				text = res.read()
+			filePath = croppedPath
 
 		if is_booklet:
 			booklet = "-o number-up=2"
