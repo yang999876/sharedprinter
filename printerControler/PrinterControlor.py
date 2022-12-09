@@ -70,8 +70,8 @@ class PrinterControlor(object):
 			sides = "-o sides=one-sided"
 
 		if crop_margin:
-			cropCommand = f"pdfcropmargins {filePath}"
 			croppedPath = filePath[:-4] + "_cropped.pdf"
+			cropCommand = f"pdfcropmargins {filePath} -o {croppedPath}"
 			with os.popen(cropCommand) as res:
 				text = res.read()
 			filePath = croppedPath
