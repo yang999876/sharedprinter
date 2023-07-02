@@ -63,8 +63,9 @@ class Linker(object):
                 return json.loads(res.content)
             else:
                 self.logger.error(f"error getorderfile {res.status_code} {res.reason}")
+                return None
         except Exception as e:
-            self.logger.error("error occur while getting file info")
+            self.logger.error(f"error occur while getting file info: {e}")
             return None
 
     # 返回订单完成的消息
@@ -101,6 +102,8 @@ class Linker(object):
                     self.order_list.append(orderid)
                     # 获取订单的文件
                     file_list = self.get_order_files(orderid)
+                    if file_list == None:
+                        continue
 
                     self.order_files[orderid] = []
                     for file in file_list:
