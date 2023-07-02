@@ -12,7 +12,30 @@ class Linker(object):
         self.orderProcessor = orderProcessor
         self.order_list = []
         self.order_files = {}
+        self.timeoutCnt = 0
         self.logger = logging.getLogger("printer.linker")
+
+    def mark_printer_awake(self):
+        try:
+            res = requests.get(f"{self.server}markawake/?printerid={self.printer_id}")
+            if res.status_code==200:
+                return res.text
+            else:
+                self.logger.error(f"error marking printer awake {res.status_code} {res.reason}")
+        except Exception as e:
+            self.logger.error("error marking printer awake")
+            return False
+
+    def mark_printer_sleep(self):
+        try:
+            res = requests.get(f"{self.server}marksleep/?printerid={self.printer_id}")
+            if res.status_code==200:
+                return res.text
+            else:
+                self.logger.error(f"error marking printer sleep {res.status_code} {res.reason}")
+        except Exception as e:
+            self.logger.error("error marking printer sleep")
+            return False
 
     # 根据设备编号获取未完成订单
     def get_my_orders(self):
@@ -23,8 +46,13 @@ class Linker(object):
             response = requests.get(url, timeout=(2, 5))
             content = json.loads(response.content)
             return content
+        except (requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout, TimeoutError):
+            self.timeoutCnt += 1
+            if (self.timeoutCnt > 10):
+                self.logger.error("timeout accumulates to 10")
+                self.timeoutCnt = 0
         except Exception as e:
-            self.logger.error("error occur while fetching new orders", exc_info=True)
+            self.logger.error("error occur while fetching new orders")
             return False
 
     # 根据订单号获得文件信息
@@ -35,8 +63,9 @@ class Linker(object):
                 return json.loads(res.content)
             else:
                 self.logger.error(f"error getorderfile {res.status_code} {res.reason}")
+                return None
         except Exception as e:
-            self.logger.error("error occur while getting file info", exc_info=True)
+            self.logger.error(f"error occur while getting file info: {e}")
             return None
 
     # 返回订单完成的消息
@@ -48,7 +77,7 @@ class Linker(object):
             else:
                 self.logger.error(f"error fileok {res.status_code} {res.reason}")
         except Exception as e:
-            self.logger.error("error occur while sending fileok signal", exc_info=True)
+            self.logger.error("error occur while sending fileok signal")
             return False
 
     # 根据文件名下载文件
@@ -60,10 +89,9 @@ class Linker(object):
             else:
                 self.logger.error(f"error getfile {res.status_code} {res.reason}")
         except:
-            self.logger.error("error occur while downloading file", exc_info=True)
+            self.logger.error("error occur while downloading file")
             return self.getfile(file_name)
 
-    # 查询并处理订单，将订单加入工作队列
     def check_order(self):
         while True:
             orders = self.get_my_orders()
@@ -74,6 +102,8 @@ class Linker(object):
                     self.order_list.append(orderid)
                     # 获取订单的文件
                     file_list = self.get_order_files(orderid)
+                    if file_list == None:
+                        continue
 
                     self.order_files[orderid] = []
                     for file in file_list:
@@ -94,7 +124,6 @@ class Linker(object):
                             self.orderProcessor.file_list.put(file)
             sleep(10)
     
-    # 打印完成后
     def order_complete(self): 
         while True:
             message = self.messageQueue.get()
@@ -114,10 +143,18 @@ class Linker(object):
                         # 删除文件失败
                         self.logger.error("Error occur!!!",exc_info = True)
 
-    # 连续处理订单
+    def check_printer(self):
+        while(True):
+            if self.orderProcessor.printer.checkPrinterAlive():
+                self.mark_printer_awake()
+            else:
+                self.mark_printer_sleep()
+            sleep(60)
+
     def checkloop(self):
         Thread(target=self.order_complete).start()
         Thread(target=self.check_order).start()
+        Thread(target=self.check_printer).start()
 
 if __name__=="__main__":
     from queue import Queue

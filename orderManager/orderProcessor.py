@@ -8,16 +8,15 @@ import json
 from time import sleep
 from time import time
 from queue import Queue
-from printerControler.PrinterControlor import PrinterControlor
 
 class OrderProcessor(object):
-    def __init__(self, order_list_path, messageQueue):
+    def __init__(self, controler, order_list_path, messageQueue):
         self.messageQueue = messageQueue
         self.order_list_path = order_list_path
         self.file_list = Queue(maxsize=0)
         Thread(target=self.auto_delete).start()
-        self.printer = PrinterControlor()
-        self.logger = logging.getLogger("printer.linker")
+        self.printer = controler
+        self.logger = logging.getLogger("printer.orderProcesser")
 
     # 自动删除一天前的文件
     def auto_delete(self):
@@ -52,7 +51,7 @@ class OrderProcessor(object):
         if not fileBuffer:
             self.logger.error("file not exist")
             return False
-        self.logger.info(f"#{file['order_id']} saving '{file['file_name']}'")
+        self.logger.info(f"#{file['order_id']} saving {file['storage_name']} with '{file['file_name']}'")
         orderid = file['order_id']
         while "config" in os.listdir(f"{self.order_list_path}{orderid}"):
             # 当配置文件在订单文件夹内时
@@ -74,7 +73,7 @@ class OrderProcessor(object):
     # 检测打印任务是否完成
     def observePrintingJob(self, jobid, order_id, file_id):
         while self.printer.checkJobIsAlive(jobid):
-            sleep(10)
+            sleep(1)
         self.messageQueue.put({
             "order_id":order_id, 
             "complete": True,
@@ -83,7 +82,6 @@ class OrderProcessor(object):
 
     # order字典
     def addOrder(self, order):
-        # TODO
         workDir = self.order_list_path+str(order["order_id"])
         try:
             os.mkdir(workDir)
@@ -105,7 +103,7 @@ class OrderProcessor(object):
             order_id = file['order_id']
             have_file = self.is_file_download(file)
             if have_file:
-                self.logger.info(f"#{order_id} printing {filename}")
+                self.logger.info(f"#{order_id} printing {file['file_name']}")
                 jobid = self.printer.printFile(file, f"{orderDir}/{filename}")
                 self.observePrintingJob(jobid, order_id, file_id)
             # self.file_list.task_done()
